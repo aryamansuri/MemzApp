@@ -1,12 +1,52 @@
-# React + Vite
+Memz
+A modern, diary-inspired web app for logging, tagging, and visualizing your memories and events. Built with React, Firebase, and Recharts.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Features
+📓 Create and manage multiple logs (like diaries or journals)
+📝 Add events to each log with title, date, notes, and tags
+🏷️ Tag events and search/filter by tag
+📊 Visualize tag usage with interactive bar charts (Recharts)
+🔎 View stats and co-tag patterns for each log
+☁️ Real-time sync and persistence with Firebase Firestore
+🗑️ Delete logs and events easily
+✨ Beautiful, responsive UI with Tailwind CSS
 
-Currently, two official plugins are available:
+Getting Started
+1. Clone the repo
+git clone https://github.com/your-username/your-repo-name.git
+cd your-repo-name
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+2. Install dependencies
+npm install
 
-## Expanding the ESLint configuration
+3. Set up Firebase
+Create a Firebase project at firebase.google.com
+Enable Firestore Database
+Copy your Firebase config into firebase.js
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+4. Start the app
+npm run dev
+
+Open http://localhost:5173 in your browser.
+
+Project Structure
+src/
+  App.jsx
+  firebase.js
+  ...
+public/
+  index.html
+...
+
+
+Tech Stack
+React
+Firebase Firestore
+Recharts
+Tailwind CSS
+Vite
+Customization
+You can change the look and feel by editing Tailwind classes in App.jsx.
+To use your own Firebase project, update firebase.js.
+License
+MIT
