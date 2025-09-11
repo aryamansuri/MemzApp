@@ -28,6 +28,9 @@ export default function App() {
   const [tagQuery, setTagQuery] = useState("");
   const eventFormRef = useRef(null);
   const [showEventForm, setShowEventForm] = useState(false);
+  const [showCreateLogModal, setShowCreateLogModal] = useState(false);
+  const [newLogName, setNewLogName] = useState("");
+
 
   // Load logs in real-time
   useEffect(() => {
@@ -47,12 +50,13 @@ export default function App() {
     return () => unsubscribe();
   }, [selectedLog?.id]);
 
-  async function handlePromptCreateLog() {
-    const name = prompt("Enter new log name:");
-    if (name && name.trim()) {
-      await addDoc(collection(db, "logs"), { name: name.trim() });
-    }
+  async function handleCreateLog() {
+    if (!newLogName.trim()) return;
+    await addDoc(collection(db, "logs"), { name: newLogName.trim() });
+    setNewLogName("");
+    setShowCreateLogModal(false);
   }
+
 
   async function handleDeleteLog(logId) {
     const eventsRef = collection(db, "logs", logId, "events");
@@ -114,6 +118,37 @@ export default function App() {
       <h1 className="text-5xl font-extrabold mt-10 mb-4 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent drop-shadow-md">
         Memz
       </h1>
+
+      {/* Add Log */}
+      {showCreateLogModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50">
+          <div className="bg-gray-800 rounded-2xl shadow-xl p-6 w-[90%] max-w-md animate-fade-in">
+            <h2 className="text-xl font-bold text-white mb-4">Create New Log</h2>
+            <input
+              type="text"
+              placeholder="Enter log name..."
+              value={newLogName}
+              onChange={(e) => setNewLogName(e.target.value)}
+              className="w-full p-3 rounded-lg bg-gray-700 text-white border border-purple-700/30 focus:outline-none focus:ring-2 focus:ring-purple-400 mb-4"
+            />
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowCreateLogModal(false)}
+                className="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 text-white"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateLog}
+                className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 font-semibold hover:opacity-90"
+              >
+                Create
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {!selectedLog && (
         <div className="text-center max-w-md w-full">
@@ -329,7 +364,7 @@ export default function App() {
       {/* Floating Action Button (hide in log and stats view) */}
       {!selectedLog && (
         <button
-          onClick={() => handlePromptCreateLog()}
+          onClick={() => setShowCreateLogModal(true)}
           className="fixed bottom-8 right-8 bg-gradient-to-br from-purple-500 to-pink-500 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-3xl hover:scale-110 transition"
         >
           +
@@ -340,18 +375,16 @@ export default function App() {
       {selectedLog && (
         <div className="fixed bottom-0 w-full bg-gray-800 border-t border-gray-700 flex justify-around py-3">
           <button
-            className={`flex flex-col items-center ${
-              view === "logs" ? "text-purple-400" : "text-gray-400"
-            }`}
+            className={`flex flex-col items-center ${view === "logs" ? "text-purple-400" : "text-gray-400"
+              }`}
             onClick={() => setView("logs")}
           >
             📄
             <span className="text-xs">Logs</span>
           </button>
           <button
-            className={`flex flex-col items-center ${
-              view === "stats" ? "text-purple-400" : "text-gray-400"
-            }`}
+            className={`flex flex-col items-center ${view === "stats" ? "text-purple-400" : "text-gray-400"
+              }`}
             onClick={() => setView("stats")}
           >
             📊
