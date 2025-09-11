@@ -23,8 +23,8 @@ Built with **React**, **Firebase**, and **Recharts**.
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/your-repo-name.git
-cd your-repo-name
+https://github.com/aryamansuri/MemzApp.git
+cd MemzApp
 ```
 
 ### 2. Install Dependencies
