@@ -64,14 +64,18 @@ const Index = () => {
               </p>
             </div>
             
-            <div className="bg-card/50 border border-border/50 rounded-lg p-8 max-w-md mx-auto">
+            <button
+              type="button"
+              className="bg-card/50 border border-border/50 rounded-lg p-8 max-w-md mx-auto flex flex-col items-center hover:shadow-lg transition cursor-pointer"
+              onClick={() => setShowCreateModal(true)}
+            >
               <div className="flex items-center justify-center w-12 h-12 bg-primary/10 rounded-full mx-auto mb-4">
                 <Plus className="w-6 h-6 text-primary" />
               </div>
               <p className="text-sm text-muted-foreground">
-                Click the + button to create your first log
+                Click here to create your first log
               </p>
-            </div>
+            </button>
           </div>
         )}
       </div>
