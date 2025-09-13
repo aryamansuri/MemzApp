@@ -5,12 +5,14 @@ interface LogContextType {
   logs: Log[];
   addLog: (log: Omit<Log, 'id' | 'createdAt' | 'events'>) => void;
   addEvent: (logId: string, event: Omit<Event, 'id' | 'timestamp'>) => void;
+  deleteEvent: (logId: string, eventId: string) => void;
+  deleteLog: (logId: string) => void;
   getLog: (id: string) => Log | undefined;
 }
 
 const LogContext = createContext<LogContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'meme-logs';
+const STORAGE_KEY = 'memz-logs';
 
 export const LogProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [logs, setLogs] = useState<Log[]>([]);
@@ -67,12 +69,25 @@ export const LogProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     ));
   };
 
+
+  const deleteEvent = (logId: string, eventId: string) => {
+    setLogs(prev => prev.map(log =>
+      log.id === logId
+        ? { ...log, events: log.events.filter(event => event.id !== eventId) }
+        : log
+    ));
+  };
+
+  const deleteLog = (logId: string) => {
+    setLogs(prev => prev.filter(log => log.id !== logId));
+  };
+
   const getLog = (id: string) => {
     return logs.find(log => log.id === id);
   };
 
   return (
-    <LogContext.Provider value={{ logs, addLog, addEvent, getLog }}>
+  <LogContext.Provider value={{ logs, addLog, addEvent, deleteEvent, deleteLog, getLog }}>
       {children}
     </LogContext.Provider>
   );

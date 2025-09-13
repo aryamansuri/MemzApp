@@ -10,7 +10,11 @@ import { useState } from "react";
 const LogDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getLog, addEvent } = useLogContext();
+  const { getLog, addEvent, deleteEvent, deleteLog } = useLogContext();
+  const handleDeleteLog = () => {
+    deleteLog(log.id);
+    navigate("/");
+  };
   const [showAnalytics, setShowAnalytics] = useState(false);
 
   const log = id ? getLog(id) : undefined;
@@ -49,6 +53,14 @@ const LogDetail = () => {
       <div className="bg-card border-b border-border shadow-soft">
         <div className="max-w-4xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between mb-4">
+            <Button
+              onClick={handleDeleteLog}
+              variant="destructive"
+              size="sm"
+              className="ml-auto"
+            >
+              Delete Log
+            </Button>
             <Button
               onClick={() => navigate("/")}
               variant="ghost"
@@ -102,7 +114,11 @@ const LogDetail = () => {
               {log.events.length > 0 ? (
                 <div className="space-y-4">
                   {log.events.map((event) => (
-                    <EventCard key={event.id} event={event} />
+                    <EventCard
+                      key={event.id}
+                      event={event}
+                      onDelete={() => deleteEvent(log.id, event.id)}
+                    />
                   ))}
                 </div>
               ) : (

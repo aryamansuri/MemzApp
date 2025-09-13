@@ -8,7 +8,7 @@ import { FileText, Plus } from "lucide-react";
 
 const Index = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const { logs, addLog } = useLogContext();
+  const { logs, addLog, deleteLog } = useLogContext();
   const navigate = useNavigate();
 
   const handleCreateLog = (logData: { title: string; description?: string }) => {
@@ -25,7 +25,7 @@ const Index = () => {
       <div className="bg-card border-b border-border shadow-soft">
         <div className="max-w-6xl mx-auto px-4 py-8">
           <div className="text-center space-y-2">
-            <h1 className="text-4xl font-bold text-foreground">Meme</h1>
+            <h1 className="text-4xl font-bold text-foreground">Memz</h1>
             <p className="text-lg text-muted-foreground">Your personal logging companion</p>
           </div>
         </div>
@@ -47,6 +47,7 @@ const Index = () => {
                   key={log.id}
                   log={log}
                   onClick={() => handleLogClick(log.id)}
+                  onDelete={() => deleteLog(log.id)}
                 />
               ))}
             </div>
