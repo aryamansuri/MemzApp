@@ -85,7 +85,7 @@ export const AddEventForm = ({ onAddEvent }: AddEventFormProps) => {
           <TagInput
             tags={tags}
             onChange={setTags}
-            placeholder="Add tags like 'dinner', 'birthday'..."
+            placeholder="Add tags like 'dinner', 'go-karting'..."
           />
         </div>
         
