@@ -1,5 +1,18 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Log, Event } from '@/types';
+import { db } from '@/firebase';
+import {
+  collection,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  onSnapshot,
+  getDoc,
+  Timestamp,
+  query,
+  orderBy
+} from 'firebase/firestore';
 
 interface LogContextType {
   logs: Log[];
@@ -12,74 +25,78 @@ interface LogContextType {
 
 const LogContext = createContext<LogContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'memz-logs';
+const LOGS_COLLECTION = 'logs';
 
 export const LogProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [logs, setLogs] = useState<Log[]>([]);
 
-  // Load logs from localStorage on mount
+  // Real-time Firestore sync
   useEffect(() => {
-    const savedLogs = localStorage.getItem(STORAGE_KEY);
-    if (savedLogs) {
-      try {
-        const parsedLogs = JSON.parse(savedLogs);
-        // Convert date strings back to Date objects
-        const logsWithDates = parsedLogs.map((log: any) => ({
-          ...log,
-          createdAt: new Date(log.createdAt),
-          events: log.events.map((event: any) => ({
+    const q = query(collection(db, LOGS_COLLECTION), orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const logsData: Log[] = snapshot.docs.map((docSnap) => {
+        const data = docSnap.data();
+        return {
+          id: docSnap.id,
+          title: data.title,
+          description: data.description,
+          createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date(data.createdAt),
+          events: (data.events || []).map((event: any) => ({
             ...event,
-            timestamp: new Date(event.timestamp)
-          }))
-        }));
-        setLogs(logsWithDates);
-      } catch (error) {
-        console.error('Failed to load logs from localStorage:', error);
-      }
-    }
+            timestamp: event.timestamp instanceof Timestamp ? event.timestamp.toDate() : new Date(event.timestamp)
+          })),
+          color: data.color,
+        };
+      });
+      setLogs(logsData);
+    });
+    return () => unsubscribe();
   }, []);
 
-  // Save logs to localStorage whenever logs change
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
-  }, [logs]);
-
-  const addLog = (logData: Omit<Log, 'id' | 'createdAt' | 'events'>) => {
-    const newLog: Log = {
-      ...logData,
-      id: crypto.randomUUID(),
+  const addLog = async (logData: Omit<Log, 'id' | 'createdAt' | 'events'>) => {
+    const { title, description, color } = logData;
+    const docData: any = {
+      title,
       createdAt: new Date(),
       events: [],
     };
-    setLogs(prev => [newLog, ...prev]);
+    if (description !== undefined && description !== "") docData.description = description;
+    if (color !== undefined) docData.color = color;
+    await addDoc(collection(db, LOGS_COLLECTION), docData);
   };
 
-  const addEvent = (logId: string, eventData: Omit<Event, 'id' | 'timestamp'>) => {
-    const newEvent: Event = {
+  const addEvent = async (logId: string, eventData: Omit<Event, 'id' | 'timestamp'>) => {
+    const event: Event = {
       ...eventData,
       id: crypto.randomUUID(),
       timestamp: new Date(),
       tags: eventData.tags || [],
     };
-
-    setLogs(prev => prev.map(log => 
-      log.id === logId 
-        ? { ...log, events: [newEvent, ...log.events] }
-        : log
-    ));
+    const logRef = doc(db, LOGS_COLLECTION, logId);
+    const logSnap = await getDoc(logRef);
+    if (logSnap.exists()) {
+      const logData = logSnap.data();
+      const prevEvents = Array.isArray(logData.events) ? logData.events : [];
+      await updateDoc(logRef, {
+        events: [event, ...prevEvents],
+      });
+    }
   };
 
 
-  const deleteEvent = (logId: string, eventId: string) => {
-    setLogs(prev => prev.map(log =>
-      log.id === logId
-        ? { ...log, events: log.events.filter(event => event.id !== eventId) }
-        : log
-    ));
+  const deleteEvent = async (logId: string, eventId: string) => {
+    const logRef = doc(db, LOGS_COLLECTION, logId);
+    const logSnap = await getDoc(logRef);
+    if (logSnap.exists()) {
+      const logData = logSnap.data();
+      const prevEvents = Array.isArray(logData.events) ? logData.events : [];
+      const updatedEvents = prevEvents.filter((event: any) => event.id !== eventId);
+      await updateDoc(logRef, { events: updatedEvents });
+    }
   };
 
-  const deleteLog = (logId: string) => {
-    setLogs(prev => prev.filter(log => log.id !== logId));
+  const deleteLog = async (logId: string) => {
+    await deleteDoc(doc(db, LOGS_COLLECTION, logId));
   };
 
   const getLog = (id: string) => {
